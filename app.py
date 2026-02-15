@@ -6,6 +6,7 @@ import cv2
 import uuid
 from werkzeug.utils import secure_filename
 from tensorflow.keras.preprocessing import image
+import tensorflow as tf
 
 app = Flask(__name__)
 
@@ -21,7 +22,11 @@ ALLOWED_EXTENSIONS = (".png", ".jpg", ".jpeg")
 # =========================
 # Load Model
 # =========================
-model = tf.keras.models.load_model("leaf_nutrient_model.h5")
+interpreter = tf.lite.Interpreter(model_path="leaf_nutrient_model.tflite")
+interpreter.allocate_tensors()
+
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
 CLASS_NAMES = ["Healthy", "Nitrogen", "Phosphorus", "Potassium"]
 
@@ -120,8 +125,11 @@ def predict():
     img_array = image.img_to_array(img) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    predictions = model.predict(img_array)[0]
+    interpreter.set_tensor(input_details[0]['index'], img_array.astype("float32"))
+    interpreter.invoke()
+    predictions = interpreter.get_tensor(output_details[0]['index'])[0]
     predicted_index = np.argmax(predictions)
+
     predicted_class = CLASS_NAMES[predicted_index]
     confidence = round(float(predictions[predicted_index]) * 100, 2)
 
