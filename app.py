@@ -6,7 +6,8 @@ import cv2
 import uuid
 from werkzeug.utils import secure_filename
 from tensorflow.keras.preprocessing import image
-import tensorflow as tf
+import tflite_runtime.interpreter as tflite
+
 
 app = Flask(__name__)
 
