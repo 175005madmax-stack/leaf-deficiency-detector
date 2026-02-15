@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaf Analysis - Nutrient Deficiency Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      #video {
+        transform: scaleX(-1);
+        border-radius: 1rem;
+      }
+      .pulse-animation {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+      .camera-border {
+        position: relative;
+      }
+      .camera-border::before {
+        content: "";
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        right: -4px;
+        bottom: -4px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 1.2rem;
+        z-index: -1;
+      }
+      .mobile-menu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+      .mobile-menu.active {
+        max-height: 500px;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Header with Navigation -->
+    <header
+      class="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg sticky top-0 z-50"
+    >
+      <nav class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <!-- Logo and Brand -->
+          <div class="flex items-center space-x-3">
+            <svg
+              class="w-10 h-10 md:w-12 md:h-12 text-white"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"
+              />
+            </svg>
+            <div>
+              <h1 class="text-white text-lg md:text-xl font-bold leading-tight">
+                Leaf Deficiency Detector
+              </h1>
+              <p class="text-white/80 text-xs hidden sm:block">
+                AI-Powered Analysis
+              </p>
+            </div>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center space-x-6">
+            <a href="/" class="text-white/90 hover:text-white transition"
+              >Home</a
+            >
+            <a
+              href="/form"
+              class="text-white font-semibold hover:text-white/80 transition border-b-2 border-white"
+              >Detection</a
+            >
+            <a
+              href="/"
+              class="bg-white text-indigo-600 px-6 py-2 rounded-full font-semibold hover:bg-white/90 transition shadow-lg"
+            >
+              <svg
+                class="inline-block w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              Home
+            </a>
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <button id="mobileMenuBtn" class="md:hidden text-white p-2">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobileMenu" class="mobile-menu md:hidden">
+          <div class="pt-4 pb-2 space-y-2">
+            <a
+              href="/"
+              class="block text-white/90 px-4 py-2 hover:bg-white/10 rounded-lg transition"
+              >Home</a
+            >
+            <a
+              href="/form"
+              class="block text-white font-semibold px-4 py-2 hover:bg-white/10 rounded-lg transition"
+              >Detection</a
+            >
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-6 md:py-8 max-w-7xl">
+      <!-- Header -->
+      <div class="text-center mb-6 md:mb-8">
+        <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-2 md:mb-3">
+          Analyze Your Plant's Health
+        </h2>
+        <p class="text-gray-600 text-base md:text-lg px-4">
+          Capture or upload a leaf image to detect nutrient deficiencies
+        </p>
+      </div>
+
+      <!-- Main Card -->
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+          <!-- Camera Section -->
+          <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 md:p-8">
+            <div class="mb-4 md:mb-6">
+              <div class="flex items-center justify-between mb-3 md:mb-4">
+                <h3
+                  class="text-lg md:text-xl font-bold text-gray-800 flex items-center"
+                >
+                  <svg
+                    class="w-5 h-5 md:w-6 md:h-6 mr-2 text-indigo-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  Live Camera
+                </h3>
+                <span
+                  id="cameraStatus"
+                  class="px-2 md:px-3 py-1 bg-gray-200 text-gray-600 text-xs rounded-full font-medium"
+                >
+                  Initializing...
+                </span>
+              </div>
+
+              <!-- Camera Preview -->
+              <div
+                class="camera-border bg-gray-900 rounded-xl overflow-hidden mb-3 md:mb-4 relative"
+                style="aspect-ratio: 1/1"
+              >
+                <video
+                  id="video"
+                  class="w-full h-full object-cover"
+                  autoplay
+                  playsinline
+                ></video>
+                <div
+                  id="cameraPlaceholder"
+                  class="absolute inset-0 flex items-center justify-center bg-gray-800"
+                >
+                  <div class="text-center p-4">
+                    <svg
+                      class="w-12 h-12 md:w-16 md:h-16 mx-auto text-gray-600 mb-3 pulse-animation"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                      />
+                    </svg>
+                    <p class="text-gray-400 text-xs md:text-sm">
+                      Requesting camera access...
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hidden Canvas -->
+              <canvas
+                id="canvas"
+                width="224"
+                height="224"
+                style="display: none"
+              ></canvas>
+
+              <!-- Capture Button -->
+              <button
+                onclick="captureImage()"
+                id="captureBtn"
+                disabled
+                class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                <svg
+                  class="inline-block w-5 h-5 md:w-6 md:h-6 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                Capture Image
+              </button>
+            </div>
+
+            <!-- Info Box -->
+            <div
+              class="bg-white/60 backdrop-blur rounded-xl p-3 md:p-4 border border-indigo-100"
+            >
+              <h4
+                class="font-semibold text-gray-800 mb-2 flex items-center text-sm md:text-base"
+              >
+                <svg
+                  class="w-4 h-4 md:w-5 md:h-5 mr-2 text-indigo-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Camera Tips
+              </h4>
+              <ul class="text-xs md:text-sm text-gray-600 space-y-1">
+                <li>• Ensure good lighting conditions</li>
+                <li>• Hold the leaf steady in frame</li>
+                <li>• Avoid shadows on the leaf</li>
+                <li>• Fill most of the frame with the leaf</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Upload Section -->
+          <div class="p-4 md:p-8">
+            <div class="mb-4 md:mb-6">
+              <h3
+                class="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4 flex items-center"
+              >
+                <svg
+                  class="w-5 h-5 md:w-6 md:h-6 mr-2 text-purple-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                Upload Image
+              </h3>
+
+              <!-- Upload Form -->
+              <form
+                id="uploadForm"
+                action="/predict"
+                method="post"
+                enctype="multipart/form-data"
+              >
+                <!-- Drag and Drop Area -->
+                <div
+                  id="dropZone"
+                  class="border-3 border-dashed border-gray-300 rounded-xl p-6 md:p-8 text-center hover:border-purple-400 transition duration-300 cursor-pointer bg-gray-50 hover:bg-purple-50 mb-3 md:mb-4"
+                >
+                  <input
+                    type="file"
+                    name="leaf_image"
+                    id="fileInput"
+                    accept="image/*"
+                    class="hidden"
+                    required
+                  />
+                  <label for="fileInput" class="cursor-pointer">
+                    <svg
+                      class="w-12 h-12 md:w-16 md:h-16 mx-auto text-gray-400 mb-3 md:mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    <p
+                      class="text-gray-700 font-semibold mb-2 text-sm md:text-base"
+                    >
+                      Drop your image here or click to browse
+                    </p>
+                    <p class="text-gray-500 text-xs md:text-sm">
+                      Supports: JPG, PNG, JPEG
+                    </p>
+                  </label>
+                </div>
+
+                <!-- File Preview -->
+                <div id="filePreview" class="hidden mb-3 md:mb-4">
+                  <div
+                    class="bg-gray-100 rounded-xl p-3 md:p-4 flex items-center justify-between"
+                  >
+                    <div class="flex items-center overflow-hidden">
+                      <svg
+                        class="w-6 h-6 md:w-8 md:h-8 text-green-500 mr-2 md:mr-3 flex-shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <div class="min-w-0">
+                        <p
+                          id="fileName"
+                          class="font-semibold text-gray-800 text-sm md:text-base truncate"
+                        >
+                          filename.jpg
+                        </p>
+                        <p
+                          id="fileSize"
+                          class="text-xs md:text-sm text-gray-500"
+                        >
+                          0 KB
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onclick="clearFile()"
+                      class="text-red-500 hover:text-red-700 flex-shrink-0 ml-2"
+                    >
+                      <svg
+                        class="w-5 h-5 md:w-6 md:h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                  type="submit"
+                  class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 md:py-4 rounded-xl font-semibold text-base md:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-300"
+                >
+                  <svg
+                    class="inline-block w-5 h-5 md:w-6 md:h-6 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                    />
+                  </svg>
+                  Analyze Leaf
+                </button>
+              </form>
+            </div>
+
+            <!-- Detection Info -->
+            <div class="space-y-2 md:space-y-3">
+              <h4
+                class="font-semibold text-gray-800 mb-2 md:mb-3 text-sm md:text-base"
+              >
+                What We Detect:
+              </h4>
+
+              <div
+                class="flex items-center p-2 md:p-3 bg-green-50 rounded-lg border border-green-200"
+              >
+                <div
+                  class="w-8 h-8 md:w-10 md:h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold mr-2 md:mr-3 flex-shrink-0 text-sm md:text-base"
+                >
+                  ✓
+                </div>
+                <div class="min-w-0">
+                  <p class="font-semibold text-gray-800 text-xs md:text-sm">
+                    Healthy Leaves
+                  </p>
+                  <p class="text-xs text-gray-600">Normal nutrient levels</p>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center p-2 md:p-3 bg-yellow-50 rounded-lg border border-yellow-200"
+              >
+                <div
+                  class="w-8 h-8 md:w-10 md:h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-2 md:mr-3 flex-shrink-0 text-sm md:text-base"
+                >
+                  N
+                </div>
+                <div class="min-w-0">
+                  <p class="font-semibold text-gray-800 text-xs md:text-sm">
+                    Nitrogen Deficiency
+                  </p>
+                  <p class="text-xs text-gray-600">Yellowing of older leaves</p>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center p-2 md:p-3 bg-orange-50 rounded-lg border border-orange-200"
+              >
+                <div
+                  class="w-8 h-8 md:w-10 md:h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold mr-2 md:mr-3 flex-shrink-0 text-sm md:text-base"
+                >
+                  P
+                </div>
+                <div class="min-w-0">
+                  <p class="font-semibold text-gray-800 text-xs md:text-sm">
+                    Phosphorus Deficiency
+                  </p>
+                  <p class="text-xs text-gray-600">Purple/dark discoloration</p>
+                </div>
+              </div>
+
+              <div
+                class="flex items-center p-2 md:p-3 bg-red-50 rounded-lg border border-red-200"
+              >
+                <div
+                  class="w-8 h-8 md:w-10 md:h-10 bg-red-500 rounded-full flex items-center justify-center text-white font-bold mr-2 md:mr-3 flex-shrink-0 text-sm md:text-base"
+                >
+                  K
+                </div>
+                <div class="min-w-0">
+                  <p class="font-semibold text-gray-800 text-xs md:text-sm">
+                    Potassium Deficiency
+                  </p>
+                  <p class="text-xs text-gray-600">Brown edges and spots</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How it Works Section -->
+      <div class="mt-8 md:mt-12 bg-white rounded-2xl shadow-lg p-4 md:p-8">
+        <h3
+          class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6 text-center"
+        >
+          How It Works
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div class="text-center">
+            <div
+              class="w-12 h-12 md:w-16 md:h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4"
+            >
+              <span class="text-xl md:text-2xl font-bold text-indigo-600"
+                >1</span
+              >
+            </div>
+            <h4
+              class="font-semibold text-gray-800 mb-1 md:mb-2 text-sm md:text-base"
+            >
+              Capture/Upload
+            </h4>
+            <p class="text-xs md:text-sm text-gray-600">
+              Take a photo or upload an image
+            </p>
+          </div>
+          <div class="text-center">
+            <div
+              class="w-12 h-12 md:w-16 md:h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4"
+            >
+              <span class="text-xl md:text-2xl font-bold text-purple-600"
+                >2</span
+              >
+            </div>
+            <h4
+              class="font-semibold text-gray-800 mb-1 md:mb-2 text-sm md:text-base"
+            >
+              AI Analysis
+            </h4>
+            <p class="text-xs md:text-sm text-gray-600">
+              Deep learning model processes
+            </p>
+          </div>
+          <div class="text-center">
+            <div
+              class="w-12 h-12 md:w-16 md:h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4"
+            >
+              <span class="text-xl md:text-2xl font-bold text-pink-600">3</span>
+            </div>
+            <h4
+              class="font-semibold text-gray-800 mb-1 md:mb-2 text-sm md:text-base"
+            >
+              Detection
+            </h4>
+            <p class="text-xs md:text-sm text-gray-600">
+              Identify deficiencies accurately
+            </p>
+          </div>
+          <div class="text-center">
+            <div
+              class="w-12 h-12 md:w-16 md:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4"
+            >
+              <span class="text-xl md:text-2xl font-bold text-green-600"
+                >4</span
+              >
+            </div>
+            <h4
+              class="font-semibold text-gray-800 mb-1 md:mb-2 text-sm md:text-base"
+            >
+              Get Results
+            </h4>
+            <p class="text-xs md:text-sm text-gray-600">
+              Receive diagnosis & advice
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-8 md:mt-12 py-6 md:py-8">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-6">
+          <!-- About Section -->
+          <div>
+            <h3 class="text-base md:text-lg font-bold mb-3 flex items-center">
+              <svg
+                class="w-5 h-5 md:w-6 md:h-6 mr-2"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"
+                />
+              </svg>
+              About Project
+            </h3>
+            <p class="text-gray-400 text-xs md:text-sm">
+              AI-powered system for detecting nutrient deficiencies in plant
+              leaves using deep learning.
+            </p>
+          </div>
+
+          <!-- Quick Links -->
+          <div>
+            <h3 class="text-base md:text-lg font-bold mb-3">Quick Links</h3>
+            <ul class="space-y-2 text-xs md:text-sm">
+              <li>
+                <a href="/" class="text-gray-400 hover:text-white transition"
+                  >Home</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/form"
+                  class="text-gray-400 hover:text-white transition"
+                  >Start Detection</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Contact Info -->
+          <div>
+            <h3 class="text-base md:text-lg font-bold mb-3">Developer</h3>
+            <ul class="space-y-2 text-xs md:text-sm text-gray-400">
+              <li>Kevin Leo Sheldon</li>
+              <li>Roll No: SB230347</li>
+              <li>St. Philomena's College</li>
+              <li class="text-xs">(Autonomous)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-gray-800 pt-6 text-center">
+          <p class="text-xs md:text-sm text-gray-400">
+            © 2026 Leaf Nutrient Deficiency Detection System | ML Project
+          </p>
+          <p class="text-xs text-gray-500 mt-2">
+            Built with Python, TensorFlow, Flask & Tailwind CSS
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Mobile menu toggle
+      const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+      const mobileMenu = document.getElementById("mobileMenu");
+
+      mobileMenuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("active");
+      });
+
+      // Close mobile menu when clicking outside
+      document.addEventListener("click", (e) => {
+        if (
+          !mobileMenuBtn.contains(e.target) &&
+          !mobileMenu.contains(e.target)
+        ) {
+          mobileMenu.classList.remove("active");
+        }
+      });
+
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const fileInput = document.getElementById("fileInput");
+      const cameraStatus = document.getElementById("cameraStatus");
+      const cameraPlaceholder = document.getElementById("cameraPlaceholder");
+      const captureBtn = document.getElementById("captureBtn");
+      const dropZone = document.getElementById("dropZone");
+      const filePreview = document.getElementById("filePreview");
+      const fileName = document.getElementById("fileName");
+      const fileSize = document.getElementById("fileSize");
+
+      // Access camera (desktop + mobile)
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: "environment" } })
+        .then((stream) => {
+          video.srcObject = stream;
+          cameraStatus.textContent = "Camera Active";
+          cameraStatus.classList.remove("bg-gray-200", "text-gray-600");
+          cameraStatus.classList.add("bg-green-100", "text-green-600");
+          cameraPlaceholder.style.display = "none";
+          captureBtn.disabled = false;
+        })
+        .catch((err) => {
+          console.error("Camera error:", err);
+          cameraStatus.textContent = "Camera Unavailable";
+          cameraStatus.classList.remove("bg-gray-200", "text-gray-600");
+          cameraStatus.classList.add("bg-red-100", "text-red-600");
+          cameraPlaceholder.innerHTML = `
+                    <div class="text-center p-4 md:p-6">
+                        <svg class="w-12 h-12 md:w-16 md:h-16 mx-auto text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <p class="text-gray-400 text-xs md:text-sm">Camera access denied or unavailable</p>
+                        <p class="text-gray-500 text-xs mt-2">Please use the upload option instead</p>
+                    </div>
+                `;
+        });
+
+      function captureImage() {
+        const context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, 224, 224);
+
+        canvas.toBlob((blob) => {
+          const file = new File([blob], "captured_leaf.jpg", {
+            type: "image/jpeg",
+          });
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          fileInput.files = dataTransfer.files;
+
+          // Show preview
+          showFilePreview(file);
+
+          // Auto submit
+          document.getElementById("uploadForm").submit();
+        });
+      }
+
+      // File input change
+      fileInput.addEventListener("change", function (e) {
+        if (e.target.files.length > 0) {
+          showFilePreview(e.target.files[0]);
+        }
+      });
+
+      // Drag and drop
+      dropZone.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        dropZone.classList.add("border-purple-500", "bg-purple-100");
+      });
+
+      dropZone.addEventListener("dragleave", function (e) {
+        e.preventDefault();
+        dropZone.classList.remove("border-purple-500", "bg-purple-100");
+      });
+
+      dropZone.addEventListener("drop", function (e) {
+        e.preventDefault();
+        dropZone.classList.remove("border-purple-500", "bg-purple-100");
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          fileInput.files = files;
+          showFilePreview(files[0]);
+        }
+      });
+
+      function showFilePreview(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = (file.size / 1024).toFixed(2) + " KB";
+        filePreview.classList.remove("hidden");
+      }
+
+      function clearFile() {
+        fileInput.value = "";
+        filePreview.classList.add("hidden");
+      }
+
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function () {
+          const file = this.files[0];
+          if (!file) return;
+
+          if (!file.type.startsWith("image/")) {
+            alert("Please upload a valid image file.");
+            this.value = "";
+            return;
+          }
+
+          if (file.size > 5 * 1024 * 1024) {
+            alert("Image size too large. Max 5MB allowed.");
+            this.value = "";
+          }
+        });
+    </script>
+  </body>
+</html>

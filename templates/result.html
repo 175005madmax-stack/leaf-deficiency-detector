@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analysis Results - Leaf Deficiency Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .result-enter {
+        animation: slideUp 0.5s ease-out;
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .checkmark {
+        animation: checkmark 0.5s ease-in-out 0.3s both;
+      }
+      @keyframes checkmark {
+        0% {
+          stroke-dashoffset: 100;
+        }
+        100% {
+          stroke-dashoffset: 0;
+        }
+      }
+      .mobile-menu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+      .mobile-menu.active {
+        max-height: 500px;
+      }
+      @media print {
+        header,
+        footer,
+        .no-print {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Header with Navigation -->
+    <header
+      class="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg sticky top-0 z-50 no-print"
+    >
+      <nav class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <!-- Logo and Brand -->
+          <div class="flex items-center space-x-3">
+            <svg
+              class="w-10 h-10 md:w-12 md:h-12 text-white"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"
+              />
+            </svg>
+            <div>
+              <h1 class="text-white text-lg md:text-xl font-bold leading-tight">
+                Leaf Deficiency Detector
+              </h1>
+              <p class="text-white/80 text-xs hidden sm:block">
+                Analysis Complete
+              </p>
+            </div>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center space-x-6">
+            <a href="/" class="text-white/90 hover:text-white transition"
+              >Home</a
+            >
+            <a href="/form" class="text-white/90 hover:text-white transition"
+              >Detection</a
+            >
+            <a
+              href="/"
+              class="bg-white text-indigo-600 px-6 py-2 rounded-full font-semibold hover:bg-white/90 transition shadow-lg"
+            >
+              <svg
+                class="inline-block w-4 h-4 mr-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                />
+              </svg>
+              Home
+            </a>
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <button id="mobileMenuBtn" class="md:hidden text-white p-2">
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobileMenu" class="mobile-menu md:hidden">
+          <div class="pt-4 pb-2 space-y-2">
+            <a
+              href="/"
+              class="block text-white/90 px-4 py-2 hover:bg-white/10 rounded-lg transition"
+              >Home</a
+            >
+            <a
+              href="/form"
+              class="block text-white/90 px-4 py-2 hover:bg-white/10 rounded-lg transition"
+              >Detection</a
+            >
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-6 md:py-8 max-w-6xl">
+      <!-- Success Header -->
+      <div class="text-center mb-6 md:mb-8 result-enter">
+        <div class="inline-block mb-3 md:mb-4">
+          <svg
+            class="w-16 h-16 md:w-20 md:h-20 text-green-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              class="checkmark"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              stroke-dasharray="100"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        {% if prediction in ["Invalid Image", "Leaf Not Found"] %}
+        <div class="max-w-3xl mx-auto mt-10">
+          <div
+            class="bg-red-50 border border-red-400 rounded-2xl p-6 text-center shadow-lg"
+          >
+            <div class="text-red-600 text-4xl mb-4">⚠️</div>
+            <h2 class="text-2xl font-bold text-red-700 mb-2">
+              {{ prediction }}
+            </h2>
+            <p class="text-red-600 mb-6">{{ suggestion }}</p>
+
+            <a
+              href="/form"
+              class="inline-block bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition"
+            >
+              Try Again
+            </a>
+          </div>
+        </div>
+        {% endif %}
+
+        <h2 class="text-2xl md:text-4xl font-bold text-gray-800 mb-2">
+          Analysis Complete
+        </h2>
+        <p class="text-gray-600 text-base md:text-lg px-4">
+          AI-powered nutrient deficiency detection results
+        </p>
+      </div>
+
+      <!-- Results Card -->
+      {% if prediction not in ["Invalid Image", "Leaf Not Found"] %}
+      <div
+        class="bg-white rounded-2xl shadow-xl overflow-hidden mb-6 md:mb-8 result-enter"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+          <!-- Image Section -->
+          <div
+            class="bg-gradient-to-br from-gray-100 to-gray-200 p-4 md:p-8 flex items-center justify-center order-2 lg:order-1"
+          >
+            <div class="w-full">
+              <h3
+                class="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4 text-center"
+              >
+                Analyzed Leaf Image
+              </h3>
+              <div class="bg-white p-3 md:p-4 rounded-xl shadow-lg">
+                <img
+                  src="{{ image_path }}"
+                  alt="Analyzed Leaf"
+                  class="w-full rounded-lg shadow-md"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Section -->
+          <div class="p-4 md:p-8 order-1 lg:order-2">
+            <!-- Prediction Badge -->
+            <div class="mb-4 md:mb-6">
+              <h3
+                class="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 md:mb-3"
+              >
+                Detected Condition
+              </h3>
+              {% if prediction == "Healthy" %}
+              <div
+                class="inline-flex items-center px-4 md:px-6 py-2 md:py-3 bg-green-100 border-2 border-green-500 rounded-xl"
+              >
+                <svg
+                  class="w-6 h-6 md:w-8 md:h-8 text-green-600 mr-2 md:mr-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span class="text-xl md:text-2xl font-bold text-green-700"
+                  >{{ prediction }}</span
+                >
+              </div>
+              {% elif prediction == "Nitrogen" %}
+              <div
+                class="inline-flex items-center px-4 md:px-6 py-2 md:py-3 bg-yellow-100 border-2 border-yellow-500 rounded-xl"
+              >
+                <div
+                  class="w-6 h-6 md:w-8 md:h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white font-bold mr-2 md:mr-3 text-base md:text-lg"
+                >
+                  N
+                </div>
+                <span class="text-xl md:text-2xl font-bold text-yellow-700"
+                  >{{ prediction }} Deficiency</span
+                >
+              </div>
+              {% elif prediction == "Phosphorus" %}
+              <div
+                class="inline-flex items-center px-4 md:px-6 py-2 md:py-3 bg-orange-100 border-2 border-orange-500 rounded-xl"
+              >
+                <div
+                  class="w-6 h-6 md:w-8 md:h-8 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold mr-2 md:mr-3 text-base md:text-lg"
+                >
+                  P
+                </div>
+                <span class="text-xl md:text-2xl font-bold text-orange-700"
+                  >{{ prediction }} Deficiency</span
+                >
+              </div>
+              {% elif prediction == "Potassium" %}
+              <div
+                class="inline-flex items-center px-4 md:px-6 py-2 md:py-3 bg-red-100 border-2 border-red-500 rounded-xl"
+              >
+                <div
+                  class="w-6 h-6 md:w-8 md:h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold mr-2 md:mr-3 text-base md:text-lg"
+                >
+                  K
+                </div>
+                <span class="text-xl md:text-2xl font-bold text-red-700"
+                  >{{ prediction }} Deficiency</span
+                >
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Confidence Score -->
+            <div class="mb-6 md:mb-8">
+              <div class="flex items-center justify-between mb-2">
+                <h3
+                  class="text-xs md:text-sm font-semibold text-gray-500 uppercase tracking-wider"
+                >
+                  Confidence Score
+                </h3>
+                <span class="text-xl md:text-2xl font-bold text-gray-800"
+                  >{{ confidence }}%</span
+                >
+              </div>
+              <div
+                class="w-full bg-gray-200 rounded-full h-3 md:h-4 overflow-hidden"
+              >
+                {% if confidence >= 80 %}
+                <div
+                  class="bg-gradient-to-r from-green-500 to-green-600 h-3 md:h-4 rounded-full transition-all duration-1000 ease-out"
+                  style="width: {{ confidence }}%"
+                ></div>
+                {% elif confidence >= 60 %}
+                <div
+                  class="bg-gradient-to-r from-yellow-500 to-yellow-600 h-3 md:h-4 rounded-full transition-all duration-1000 ease-out"
+                  style="width: {{ confidence }}%"
+                ></div>
+                {% else %}
+                <div
+                  class="bg-gradient-to-r from-orange-500 to-orange-600 h-3 md:h-4 rounded-full transition-all duration-1000 ease-out"
+                  style="width: {{ confidence }}%"
+                ></div>
+                {% endif %}
+              </div>
+              <div class="flex justify-between mt-1">
+                <span class="text-xs text-gray-500">Low</span>
+                <span class="text-xs text-gray-500">High</span>
+              </div>
+            </div>
+
+            <!-- Recommendation -->
+            <div
+              class="bg-blue-50 border-l-4 border-blue-500 p-4 md:p-6 rounded-r-xl"
+            >
+              <div class="flex items-start">
+                <svg
+                  class="w-5 h-5 md:w-6 md:h-6 text-blue-500 mr-2 md:mr-3 mt-1 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <div>
+                  <h4 class="font-bold text-blue-900 mb-2 text-sm md:text-base">
+                    Recommendation
+                  </h4>
+                  <p class="text-blue-800 text-xs md:text-sm leading-relaxed">
+                    {{ suggestion }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Additional Info -->
+            {% if prediction != "Healthy" %}
+            <div
+              class="mt-4 md:mt-6 p-3 md:p-4 bg-amber-50 rounded-xl border border-amber-200"
+            >
+              <h4
+                class="font-semibold text-amber-900 mb-2 flex items-center text-xs md:text-sm"
+              >
+                <svg
+                  class="w-4 h-4 md:w-5 md:h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                Important Note
+              </h4>
+              <p class="text-amber-800 text-xs">
+                This is an AI-based detection system. For critical decisions,
+                please consult with an agricultural expert or plant pathologist.
+              </p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Detailed Information -->
+      <div
+        class="bg-white rounded-2xl shadow-lg p-4 md:p-8 mb-6 md:mb-8 result-enter"
+        style="animation-delay: 0.2s"
+      >
+        <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">
+          Understanding the Results
+        </h3>
+
+        {% if prediction == "Healthy" %}
+        <div class="space-y-3 md:space-y-4">
+          <div class="flex items-start">
+            <div
+              class="w-8 h-8 md:w-10 md:h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 mr-3 md:mr-4 flex-shrink-0"
+            >
+              <svg
+                class="w-5 h-5 md:w-6 md:h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800 mb-2 text-sm md:text-base">
+                Healthy Leaf Status
+              </h4>
+              <p class="text-gray-600 text-xs md:text-sm">
+                Your plant appears to be in good health with no major nutrient
+                deficiencies detected. Continue with your current care routine.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start">
+            <div
+              class="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3 md:mr-4 flex-shrink-0"
+            >
+              <svg
+                class="w-5 h-5 md:w-6 md:h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800 mb-2 text-sm md:text-base">
+                Maintenance Tips
+              </h4>
+              <p class="text-gray-600 text-xs md:text-sm">
+                Maintain regular watering schedules, ensure proper sunlight
+                exposure, and continue balanced fertilization to keep your plant
+                healthy.
+              </p>
+            </div>
+          </div>
+        </div>
+        {% elif prediction == "Nitrogen" %}
+        <div class="space-y-3 md:space-y-4">
+          <div class="flex items-start">
+            <div
+              class="w-8 h-8 md:w-10 md:h-10 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-700 font-bold mr-3 md:mr-4 flex-shrink-0 text-sm md:text-base"
+            >
+              N
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800 mb-2 text-sm md:text-base">
+                What is Nitrogen Deficiency?
+              </h4>
+              <p class="text-gray-600 text-xs md:text-sm">
+                Nitrogen is essential for plant growth and chlorophyll
+                production. Deficiency typically shows as yellowing of older
+                leaves first, starting from the tips and edges.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start">
+            <div
+              class="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3 md:mr-4 flex-shrink-0"
+            >
+              <svg
+                class="w-5 h-5 md:w-6 md:h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800 mb-2 text-sm md:text-base">
+                Quick Actions
+              </h4>
+              <ul class="text-gray-600 space-y-1 text-xs md:text-sm">
+                <li>
+                  • Apply nitrogen-rich fertilizer (NPK with higher N value)
+                </li>
+                <li>• Use organic compost or manure</li>
+                <li>• Consider foliar spray for quick absorption</li>
+                <li>• Monitor soil pH (optimal: 6.0-7.0)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        {% elif prediction == "Phosphorus" %}
+        <div class="space-y-3 md:space-y-4">
+          <div class="flex items-start">
+            <div
+              class="w-8 h-8 md:w-10 md:h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-700 font-bold mr-3 md:mr-4 flex-shrink-0 text-sm md:text-base"
+            >
+              P
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800 mb-2 text-sm md:text-base">
+                What is Phosphorus Deficiency?
+              </h4>
+              <p class="text-gray-600 text-xs md:text-sm">
+                Phosphorus is crucial for energy transfer and root development.
+                Deficiency often causes dark green or purplish discoloration on
+                leaves and stunted growth.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start">
+            <div
+              class="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3 md:mr-4 flex-shrink-0"
+            >
+              <svg
+                class="w-5 h-5 md:w-6 md:h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800 mb-2 text-sm md:text-base">
+                Quick Actions
+              </h4>
+              <ul class="text-gray-600 space-y-1 text-xs md:text-sm">
+                <li>• Use phosphorus-rich fertilizer (higher P in NPK)</li>
+                <li>• Add bone meal to the soil</li>
+                <li>• Ensure soil pH is correct (5.5-6.5)</li>
+                <li>• Avoid excessive watering</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        {% elif prediction == "Potassium" %}
+        <div class="space-y-3 md:space-y-4">
+          <div class="flex items-start">
+            <div
+              class="w-8 h-8 md:w-10 md:h-10 bg-red-100 rounded-full flex items-center justify-center text-red-700 font-bold mr-3 md:mr-4 flex-shrink-0 text-sm md:text-base"
+            >
+              K
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800 mb-2 text-sm md:text-base">
+                What is Potassium Deficiency?
+              </h4>
+              <p class="text-gray-600 text-xs md:text-sm">
+                Potassium regulates water and nutrient movement. Deficiency
+                shows as brown, scorched-looking edges on leaves and weak stems.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-start">
+            <div
+              class="w-8 h-8 md:w-10 md:h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-3 md:mr-4 flex-shrink-0"
+            >
+              <svg
+                class="w-5 h-5 md:w-6 md:h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-semibold text-gray-800 mb-2 text-sm md:text-base">
+                Quick Actions
+              </h4>
+              <ul class="text-gray-600 space-y-1 text-xs md:text-sm">
+                <li>• Apply potassium-rich fertilizer (higher K in NPK)</li>
+                <li>• Use wood ash or kelp meal</li>
+                <li>• Ensure proper drainage</li>
+                <li>• Monitor for pest damage</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Action Buttons -->
+      <div
+        class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center result-enter no-print"
+        style="animation-delay: 0.3s"
+      >
+        <a
+          href="/form"
+          class="inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition duration-300 text-sm md:text-base"
+        >
+          <svg
+            class="w-4 h-4 md:w-5 md:h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+            />
+          </svg>
+          Analyze Another Leaf
+        </a>
+        <button
+          onclick="window.print()"
+          class="inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 bg-white text-gray-700 border-2 border-gray-300 rounded-xl font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition duration-300 text-sm md:text-base"
+        >
+          <svg
+            class="w-4 h-4 md:w-5 md:h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+            />
+          </svg>
+          Print Report
+        </button>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-8 md:mt-12 py-6 md:py-8 no-print">
+      <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-6">
+          <!-- About Section -->
+          <div>
+            <h3 class="text-base md:text-lg font-bold mb-3 flex items-center">
+              <svg
+                class="w-5 h-5 md:w-6 md:h-6 mr-2"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"
+                />
+              </svg>
+              About Project
+            </h3>
+            <p class="text-gray-400 text-xs md:text-sm">
+              AI-powered system for detecting nutrient deficiencies in plant
+              leaves using deep learning.
+            </p>
+          </div>
+
+          <!-- Quick Links -->
+          <div>
+            <h3 class="text-base md:text-lg font-bold mb-3">Quick Links</h3>
+            <ul class="space-y-2 text-xs md:text-sm">
+              <li>
+                <a href="/" class="text-gray-400 hover:text-white transition"
+                  >Home</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/form"
+                  class="text-gray-400 hover:text-white transition"
+                  >Start Detection</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Contact Info -->
+          <div>
+            <h3 class="text-base md:text-lg font-bold mb-3">Developer</h3>
+            <ul class="space-y-2 text-xs md:text-sm text-gray-400">
+              <li>Kevin Leo Sheldon</li>
+              <li>Roll No: SB230347</li>
+              <li>St. Philomena's College</li>
+              <li class="text-xs">(Autonomous)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-gray-800 pt-6 text-center">
+          <p class="text-xs md:text-sm text-gray-400">
+            © 2026 Leaf Nutrient Deficiency Detection System | ML Project
+          </p>
+          <p class="text-xs text-gray-500 mt-2">
+            Built with Python, TensorFlow, Flask & Tailwind CSS
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Mobile menu toggle
+      const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+      const mobileMenu = document.getElementById("mobileMenu");
+
+      mobileMenuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("active");
+      });
+
+      // Close mobile menu when clicking outside
+      document.addEventListener("click", (e) => {
+        if (
+          !mobileMenuBtn.contains(e.target) &&
+          !mobileMenu.contains(e.target)
+        ) {
+          mobileMenu.classList.remove("active");
+        }
+      });
+
+      // Animate confidence bar on load
+      window.addEventListener("load", function () {
+        const bar = document.querySelector('[style*="width"]');
+        if (bar) {
+          const width = bar.style.width;
+          bar.style.width = "0%";
+          setTimeout(() => {
+            bar.style.width = width;
+          }, 100);
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+__pycache__/
+venv/
+.env
+*.pyc
+static/uploads/*
+dataset_helper.py
+plot_graphs.py
+plot_graph.py
+split_train_test.py
+train_model.py
+training_history.pkl
