@@ -1,12 +1,11 @@
 from flask import Flask, render_template, request
+import tensorflow as tf
 import numpy as np
 import os
 import cv2
 import uuid
 from werkzeug.utils import secure_filename
-from tensorflow.keras.preprocessing import image
-import tflite_runtime.interpreter as tflite
-
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -20,7 +19,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = (".png", ".jpg", ".jpeg")
 
 # =========================
-# Load Model
+# Load TFLite Model
 # =========================
 interpreter = tf.lite.Interpreter(model_path="leaf_nutrient_model.tflite")
 interpreter.allocate_tensors()
@@ -119,17 +118,20 @@ def predict():
         )
 
     # =========================
-    # Nutrient Prediction
+    # Nutrient Prediction with TFLite
     # =========================
-    img = image.load_img(file_path, target_size=(224, 224))
-    img_array = image.img_to_array(img) / 255.0
+    # Load and preprocess image
+    img = Image.open(file_path).convert('RGB')
+    img = img.resize((224, 224))
+    img_array = np.array(img, dtype=np.float32) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    interpreter.set_tensor(input_details[0]['index'], img_array.astype("float32"))
+    # Run inference
+    interpreter.set_tensor(input_details[0]['index'], img_array)
     interpreter.invoke()
     predictions = interpreter.get_tensor(output_details[0]['index'])[0]
-    predicted_index = np.argmax(predictions)
 
+    predicted_index = np.argmax(predictions)
     predicted_class = CLASS_NAMES[predicted_index]
     confidence = round(float(predictions[predicted_index]) * 100, 2)
 
@@ -147,4 +149,3 @@ def predict():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
-
