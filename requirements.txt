@@ -4,4 +4,4 @@ numpy
 opencv-python-headless
 Pillow
 werkzeug
-tflite-runtime
+tf-nightly
